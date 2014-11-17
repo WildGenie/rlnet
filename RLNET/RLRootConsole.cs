@@ -81,11 +81,13 @@ namespace RLNET
             if (width <= 0)
                 throw new ArgumentException("width cannot be zero or less");
             if (height <= 0)
-                throw new ArgumentException("width cannot be zero or less");
+                throw new ArgumentException("height cannot be zero or less");
             if (charWidth <= 0)
-                throw new ArgumentException("width cannot be zero or less");
+                throw new ArgumentException("charWidth cannot be zero or less");
             if (charHeight <= 0)
-                throw new ArgumentException("width cannot be zero or less");
+                throw new ArgumentException("charHeight cannot be zero or less");
+            if (System.IO.File.Exists(bitmapFile) == false)
+                throw new System.IO.FileNotFoundException("cannot find bitmapFile");
 
             this.scale = new Vector3(scale, scale, 1f);
             this.charWidth = charWidth;

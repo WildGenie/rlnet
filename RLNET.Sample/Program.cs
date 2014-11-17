@@ -39,13 +39,13 @@ namespace RLNET.Sample
 
         public static void Main()
         {
-            rootConsole = new RLRootConsole("terminal8x8.png", 50, 50, 8, 8, 2f, "RLNET Sample");
-            rootConsole.Update += RLConsole_Update;
-            rootConsole.Render += RLConsole_Render;
+            rootConsole = new RLRootConsole("terminal8x8.png", 50, 50, 8, 8, 1f, "RLNET Sample");
+            rootConsole.Update += rootConsole_Update;
+            rootConsole.Render += rootConsole_Render;
             rootConsole.Run();
         }
 
-        static void RLConsole_Update(object sender, UpdateEventArgs e)
+        static void rootConsole_Update(object sender, UpdateEventArgs e)
         {
             RLKeyPress keyPress = rootConsole.Keyboard.GetKeyPress();
             if (keyPress != null)
@@ -61,7 +61,7 @@ namespace RLNET.Sample
             }
         }
 
-        static void RLConsole_Render(object sender, UpdateEventArgs e)
+        static void rootConsole_Render(object sender, UpdateEventArgs e)
         {
             rootConsole.Clear();
 
