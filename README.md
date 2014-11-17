@@ -12,7 +12,7 @@ Download the source and add a reference to RLNET.dll. Be sure to add OpenTK.dll 
 
 # Using RLNET #
 
-First you must create your root console, this object has access to the window, keyboard, and mouse to for your game.
+First you must create your root console. This object has access to the window, keyboard, and mouse to for your game.
 ```
 RLRootConsole rootConsole = new RLRootConsole("terminal8x8.png", 50, 50, 8, 8, 1f, "RLNET Sample");
 ```
@@ -36,6 +36,11 @@ void rootConsole_Render(object sender, UpdateEventArgs e)
     rootConsole.Print(1, 1, "Hello World!", RLColor.White);
     rootConsole.Draw();
 }
+```
+
+Finally you let it run.
+```
+rootConsole.Run();
 ```
 
 Take a look at the RLNET.Sample project to see a working sample.
