@@ -12,7 +12,7 @@ Download the latest version and add a reference to RLNET.dll. Be sure to also ad
 
 # Using RLNET #
 
-First you must create your root console. This object has access to the window, keyboard, and mouse to for your game.
+First you must create your root console. This object has access to the window, keyboard, and mouse for your game.
 ```
 RLRootConsole rootConsole = new RLRootConsole("terminal8x8.png", 50, 50, 8, 8, 1f, "RLNET Sample");
 ```
