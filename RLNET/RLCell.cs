@@ -31,7 +31,7 @@ using System.Threading.Tasks;
 
 namespace RLNET
 {
-    internal struct RLCell
+    public struct RLCell
     {
         public RLColor backColor;
         public RLColor color;

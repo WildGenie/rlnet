@@ -97,6 +97,26 @@ namespace RLNET
         }
 
         /// <summary>
+        /// Sets the character in the specified rectangle.
+        /// </summary>
+        /// <param name="x">X position to set.</param>
+        /// <param name="y">Y position to set.</param>
+        /// <param name="width">Width of the rectangle.</param>
+        /// <param name="height">Height of the rectangle.</param>
+        /// <param name="character">Character to set.</param>
+        public void SetChar(int x, int y, int width, int height, int character)
+        {
+            if (width > 0 && height > 0)
+            {
+                for (int iy = y; iy < height + y; iy++)
+                    for (int ix = x; ix < width + x; ix++)
+                    {
+                        SetChar(ix, iy, character);
+                    }
+            }
+        }
+
+        /// <summary>
         /// Sets the background color at the specified location.
         /// </summary>
         /// <param name="x">X position to set.</param>
@@ -106,6 +126,26 @@ namespace RLNET
         {
             if (x >= 0 && y >= 0 && x < Width && y < Height)
                 cells[x, y].backColor = color;
+        }
+
+        /// <summary>
+        /// Sets the background color in the specified rectangle.
+        /// </summary>
+        /// <param name="x">X position to set.</param>
+        /// <param name="y">Y position to set.</param>
+        /// <param name="width">Width of the rectangle.</param>
+        /// <param name="height">Height of the rectangle.</param>
+        /// <param name="color">Color to set.</param>
+        public void SetBackColor(int x, int y, int width, int height, RLColor color)
+        {
+            if (width > 0 && height > 0)
+            {
+                for (int iy = y; iy < height + y; iy++)
+                    for (int ix = x; ix < width + x; ix++)
+                    {
+                        SetBackColor(ix, iy, color);
+                    }
+            }
         }
 
         /// <summary>
@@ -121,7 +161,27 @@ namespace RLNET
         }
 
         /// <summary>
-        /// Sets color, background color, and character at the specified location.
+        /// Sets the color in the specified rectangle.
+        /// </summary>
+        /// <param name="x">X position to set.</param>
+        /// <param name="y">Y position to set.</param>
+        /// <param name="width">Width of the rectangle.</param>
+        /// <param name="height">Height of the rectangle.</param>
+        /// <param name="color">Color to set.</param>
+        public void SetColor(int x, int y, int width, int height, RLColor color)
+        {
+            if (width > 0 && height > 0)
+            {
+                for (int iy = y; iy < height + y; iy++)
+                    for (int ix = x; ix < width + x; ix++)
+                    {
+                        SetColor(ix, iy, color);
+                    }
+            }
+        }
+
+        /// <summary>
+        /// Sets the color, background color, and character at the specified location.
         /// </summary>
         /// <param name="x">X position to set.</param>
         /// <param name="y">Y position to set.</param>
@@ -135,6 +195,60 @@ namespace RLNET
                 if (color.HasValue) cells[x, y].color = color.Value;
                 if (backColor.HasValue) cells[x, y].backColor = color.Value;
                 if (character.HasValue) cells[x, y].character = character.Value;
+            }
+        }
+
+        /// <summary>
+        /// Sets the color, background color, and character in the specified rectangle.
+        /// </summary>
+        /// <param name="x">X position to set.</param>
+        /// <param name="y">Y position to set.</param>
+        /// <param name="width">Width of the rectangle.</param>
+        /// <param name="height">Height of the rectangle.</param>
+        /// <param name="color">Color to set.</param>
+        public void Set(int x, int y, int width, int height, RLColor? color, RLColor? backColor, int? character)
+        {
+            if (width > 0 && height > 0)
+            {
+                for (int iy = y; iy < height + y; iy++)
+                    for (int ix = x; ix < width + x; ix++)
+                    {
+                        Set(ix, iy, color, backColor, character);
+                    }
+            }
+        }
+
+        /// <summary>
+        /// Sets color, background color, and character at the specified location.
+        /// </summary>
+        /// <param name="x">X position to set.</param>
+        /// <param name="y">Y position to set.</param>
+        /// <param name="cell">Cell to set.</param>
+        public void Set(int x, int y, RLCell cell)
+        {
+            if (x >= 0 && y >= 0 && x < Width && y < Height)
+            {
+                cells[x, y] = cell;
+            }
+        }
+
+        /// <summary>
+        /// Sets the color, background color, and character in the specified rectangle.
+        /// </summary>
+        /// <param name="x">X position to set.</param>
+        /// <param name="y">Y position to set.</param>
+        /// <param name="width">Width of the rectangle.</param>
+        /// <param name="height">Height of the rectangle.</param>
+        /// <param name="color">Color to set.</param>
+        public void Set(int x, int y, int width, int height, RLCell cell)
+        {
+            if (width > 0 && height > 0)
+            {
+                for (int iy = y; iy < height + y; iy++)
+                    for (int ix = x; ix < width + x; ix++)
+                    {
+                        Set(ix, iy, cell);
+                    }
             }
         }
 

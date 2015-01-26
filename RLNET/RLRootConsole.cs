@@ -94,6 +94,7 @@ namespace RLNET
             this.charHeight = charHeight;
 
             window = new GameWindow((int)(width * charWidth * scale), (int)(height * charHeight * scale), GraphicsMode.Default);
+            window.WindowBorder = WindowBorder.Fixed;
             window.Title = title;
             window.RenderFrame += window_RenderFrame;
             window.UpdateFrame += window_UpdateFrame;

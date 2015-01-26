@@ -39,7 +39,7 @@ namespace RLNET.Sample
 
         public static void Main()
         {
-            rootConsole = new RLRootConsole("terminal8x8.png", 50, 50, 8, 8, 1f, "RLNET Sample");
+            rootConsole = new RLRootConsole("ascii_8x8.png", 50, 50, 8, 8, 1f, "RLNET Sample");
             rootConsole.Update += rootConsole_Update;
             rootConsole.Render += rootConsole_Render;
             rootConsole.Run();
