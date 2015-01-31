@@ -35,6 +35,9 @@ namespace RLNET
     public class RLKeyboard
     {
         private RLKeyPress keyPress;
+        private bool numLock;
+        private bool capsLock;
+        private bool scrollLock;
 
         internal RLKeyboard(GameWindow gameWindow)
         {
@@ -43,24 +46,11 @@ namespace RLNET
 
         private void gameWindow_KeyDown(object sender, OpenTK.Input.KeyboardKeyEventArgs e)
         {
-            RLKeyPress newKeyPress = new RLKeyPress((RLKey)e.Key, e.Alt, e.Shift, e.Control, e.IsRepeat);
+            if (e.Key == OpenTK.Input.Key.NumLock) numLock = !numLock;
+            else if (e.Key == OpenTK.Input.Key.CapsLock) capsLock = !capsLock;
+            else if (e.Key == OpenTK.Input.Key.ScrollLock) scrollLock = !scrollLock;
+            RLKeyPress newKeyPress = new RLKeyPress((RLKey)e.Key, e.Alt, e.Shift, e.Control, e.IsRepeat, numLock, capsLock, scrollLock);
             if (keyPress != newKeyPress) keyPress = newKeyPress;
-        }
-
-        /// <summary>
-        /// Waits until a key is pressed on the keyboard.
-        /// </summary>
-        /// <returns>Key Press</returns>
-        public RLKeyPress WaitForKeyPress()
-        {
-            while (keyPress == null)
-            {
-                System.Threading.Thread.Sleep(100);
-            }
-
-            RLKeyPress kp = keyPress;
-            keyPress = null;
-            return kp;
         }
 
         /// <summary>
