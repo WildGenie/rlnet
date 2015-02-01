@@ -55,9 +55,15 @@ namespace RLNET
         private Vector3 scale;
         private int charWidth;
         private int charHeight;
+        private RLResizeType resizeType;
+        private int offsetX;
+        private int offsetY;
 
         public event UpdateEventHandler Render;
         public event UpdateEventHandler Update;
+        public event EventHandler<EventArgs> OnLoad;
+        public event EventHandler<System.ComponentModel.CancelEventArgs> OnClosing;
+        public event ResizeEventHandler OnResize;
 
         public RLKeyboard Keyboard { get; private set; }
         public RLMouse Mouse { get; private set; }
@@ -72,48 +78,179 @@ namespace RLNET
         /// <param name="charHeight">Height of the characters.</param>
         /// <param name="scale">Scale the window by this value.</param>
         /// <param name="title">Title of the window.</param>
-        public RLRootConsole(string bitmapFile, int width, int height, int charWidth, int charHeight, float scale = 1f, string title = "RLNET Console") : base(width, height)
+        public RLRootConsole(string bitmapFile, int width, int height, int charWidth, int charHeight, float scale = 1f, string title = "RLNET Console")
+            : base(width, height)
         {
-            if (bitmapFile == null)
-                throw new ArgumentNullException("fontFile");
-            if (title == null)
-                throw new ArgumentNullException("title");
-            if (width <= 0)
-                throw new ArgumentException("width cannot be zero or less");
-            if (height <= 0)
-                throw new ArgumentException("height cannot be zero or less");
-            if (charWidth <= 0)
-                throw new ArgumentException("charWidth cannot be zero or less");
-            if (charHeight <= 0)
-                throw new ArgumentException("charHeight cannot be zero or less");
-            if (System.IO.File.Exists(bitmapFile) == false)
+            RLSettings settings = new RLSettings();
+            settings.BitmapFile = bitmapFile;
+            settings.Width = width;
+            settings.Height = height;
+            settings.CharWidth = charWidth;
+            settings.CharHeight = charHeight;
+            settings.Scale = scale;
+            settings.Title = title;
+
+            Init(settings);
+        }
+
+        /// <summary>
+        /// Creates the root console.
+        /// </summary>
+        /// <param name="settings">Settings for the RLRootConsole.</param>
+        public RLRootConsole(RLSettings settings)
+            : base(settings.Width, settings.Height)
+        {
+            Init(settings);
+        }
+
+        private void Init(RLSettings settings)
+        {
+            if (settings == null)
+                throw new ArgumentNullException("settings");
+            if (settings.BitmapFile == null)
+                throw new ArgumentNullException("BitmapFile");
+            if (settings.Title == null)
+                throw new ArgumentNullException("Title");
+            if (settings.Width <= 0)
+                throw new ArgumentException("Width cannot be zero or less");
+            if (settings.Height <= 0)
+                throw new ArgumentException("Height cannot be zero or less");
+            if (settings.CharWidth <= 0)
+                throw new ArgumentException("CharWidth cannot be zero or less");
+            if (settings.CharHeight <= 0)
+                throw new ArgumentException("CharHeight cannot be zero or less");
+
+            if (System.IO.File.Exists(settings.BitmapFile) == false)
                 throw new System.IO.FileNotFoundException("cannot find bitmapFile");
 
-            this.scale = new Vector3(scale, scale, 1f);
-            this.charWidth = charWidth;
-            this.charHeight = charHeight;
+            this.scale = new Vector3(settings.Scale, settings.Scale, 1f);
+            this.charWidth = settings.CharWidth;
+            this.charHeight = settings.CharHeight;
+            this.resizeType = settings.ResizeType;
 
-            window = new GameWindow((int)(width * charWidth * scale), (int)(height * charHeight * scale), GraphicsMode.Default);
-            window.WindowBorder = WindowBorder.Fixed;
-            window.Title = title;
+            window = new GameWindow((int)(settings.Width * charWidth * scale.X), (int)(settings.Height * charHeight * scale.Y), GraphicsMode.Default);
+            window.WindowBorder = (WindowBorder)settings.WindowBorder;
+            window.Title = settings.Title;
             window.RenderFrame += window_RenderFrame;
             window.UpdateFrame += window_UpdateFrame;
-            window.Load += (sender, e) =>
-            {
-                window.VSync = VSyncMode.On;
-            };
-
+            window.Load += window_Load;
+            window.Resize += window_Resize;
             window.Closed += window_Closed;
+            window.Closing += window_Closing;
             Keyboard = new RLKeyboard(window);
-            Mouse = new RLMouse(window, charWidth, charHeight, scale);
+            Mouse = new RLMouse(window, charWidth, charHeight, settings.Scale);
 
-            texId = LoadTexture2d(bitmapFile);
+            texId = LoadTexture2d(settings.BitmapFile);
             vboId = GL.GenBuffer();
             iboId = GL.GenBuffer();
             tcboId = GL.GenBuffer();
             foreColorId = GL.GenBuffer();
             backColorId = GL.GenBuffer();
 
+            CreateBuffers(settings.Width, settings.Height);
+        }
+
+        void window_Load(object sender, EventArgs e)
+        {
+            window.VSync = VSyncMode.On;
+            if (OnLoad != null) OnLoad(this, e);
+        }
+
+        void window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
+        {
+            if (OnClosing != null) OnClosing(this, e);
+        }
+
+        /// <summary>
+        /// Resizes the window.
+        /// </summary>
+        /// <param name="width">The new width of the window, in pixels.</param>
+        /// <param name="height">The new height of the window, in pixels.</param>
+        public void ResizeWindow(int width, int height)
+        {
+            window.Width = width;
+            window.Height = height;
+        }
+
+        public void SetWindowState(RLWindowState windowState)
+        {
+            window.WindowState = (WindowState)windowState;
+        }
+
+        public void Close()
+        {
+            window.Close();
+        }
+
+        void window_Resize(object sender, EventArgs e)
+        {
+            if (resizeType == RLResizeType.None)
+            {
+                int viewWidth = (int)(Width * charWidth * scale.X);
+                int viewHeight = (int)(Height * charHeight * scale.Y);
+                int newOffsetX = (window.Width - viewWidth) / 2;
+                int newOffsetY = (window.Height - viewHeight) / 2;
+
+                if (offsetX != newOffsetX || offsetY != newOffsetY)
+                {
+                    offsetX = newOffsetX;
+                    offsetY = newOffsetY;
+                    Mouse.UpdateOffset(offsetX, offsetY);
+                    GL.Viewport(offsetX, offsetY, viewWidth, viewHeight);
+                }
+            }
+            else if (resizeType == RLResizeType.ResizeCells)
+            {
+                int width = window.Width / charWidth;
+                int height = window.Height / charHeight;
+
+                if (width != Width || height != Height)
+                {
+                    Resize(width, height);
+                    CreateBuffers(width, height);
+                    GL.Viewport(0, 0, (int)(Width * charWidth * scale.X), (int)(Height * charHeight * scale.Y));
+                    if (OnResize != null) OnResize(this, new ResizeEventArgs(width, height));
+                }
+            }
+            else if (resizeType == RLResizeType.ResizeScale)
+            {
+                float newScale = Math.Min(window.Width / (charWidth * Width), window.Height / (charHeight * Height));
+
+                if (newScale != scale.X)
+                {
+                    scale = new Vector3(newScale, newScale, 1);
+                    Mouse.UpdateScale(newScale);
+                }
+
+                int viewWidth = (int)(Width * charWidth * scale.X);
+                int viewHeight = (int)(Height * charHeight * scale.Y);
+                int newOffsetX = (window.Width - viewWidth) / 2;
+                int newOffsetY = (window.Height - viewHeight) / 2;
+
+                if (offsetX != newOffsetX || offsetY != newOffsetY)
+                {
+                    offsetX = newOffsetX;
+                    offsetY = newOffsetY;
+                    Mouse.UpdateOffset(offsetX, offsetY);
+                    GL.Viewport(offsetX, offsetY, viewWidth, viewHeight);
+                }
+            }
+        }
+
+        ~RLRootConsole()
+        {
+            if (window != null)
+                window.Dispose();
+            GL.DeleteBuffer(vboId);
+            GL.DeleteBuffer(iboId);
+            GL.DeleteBuffer(tcboId);
+            GL.DeleteBuffer(foreColorId);
+            GL.DeleteBuffer(backColorId);
+            GL.DeleteTexture(texId);
+        }
+
+        private void CreateBuffers(int width, int height)
+        {
             Vector2[] vertices = CreateVertices(width, height, charWidth, charHeight);
             GL.BindBuffer(BufferTarget.ArrayBuffer, vboId);
             GL.BufferData(BufferTarget.ArrayBuffer, (IntPtr)(vertices.Length * 2 * sizeof(float)), vertices, BufferUsageHint.StaticDraw);
@@ -130,24 +267,12 @@ namespace RLNET
             GL.BindBuffer(BufferTarget.ArrayBuffer, backColorId);
             GL.BufferData(BufferTarget.ArrayBuffer, (IntPtr)(backColorVertices.Length * 3 * sizeof(float)), backColorVertices, BufferUsageHint.DynamicDraw);
 
-            ushort[] indices = CreateIndices(width * height);
+            uint[] indices = CreateIndices(width * height);
             GL.BindBuffer(BufferTarget.ElementArrayBuffer, iboId);
-            GL.BufferData(BufferTarget.ElementArrayBuffer, (IntPtr)(indices.Length * sizeof(ushort)), indices, BufferUsageHint.StaticDraw);
+            GL.BufferData(BufferTarget.ElementArrayBuffer, (IntPtr)(indices.Length * sizeof(uint)), indices, BufferUsageHint.StaticDraw);
 
             GL.BindBuffer(BufferTarget.ArrayBuffer, 0);
             GL.BindBuffer(BufferTarget.ElementArrayBuffer, 0);
-        }
-
-        ~RLRootConsole()
-        {
-            if (window != null)
-                window.Dispose();
-            GL.DeleteBuffer(vboId);
-            GL.DeleteBuffer(iboId);
-            GL.DeleteBuffer(tcboId);
-            GL.DeleteBuffer(foreColorId);
-            GL.DeleteBuffer(backColorId);
-            GL.DeleteTexture(texId);
         }
 
         /// <summary>
@@ -297,7 +422,7 @@ namespace RLNET
             GL.ColorPointer(3, ColorPointerType.Float, 3 * sizeof(float), 0);
             GL.BufferData(BufferTarget.ArrayBuffer, (IntPtr)(backColorVertices.Length * 3 * sizeof(float)), backColorVertices, BufferUsageHint.DynamicDraw);
             //Draw Back Color
-            GL.DrawElements(PrimitiveType.Triangles, Width * Height * 6, DrawElementsType.UnsignedShort, 0);
+            GL.DrawElements(PrimitiveType.Triangles, Width * Height * 6, DrawElementsType.UnsignedInt, 0);
 
             //Fore Color / Texture Draw
             //Texture Coord Buffer
@@ -311,7 +436,7 @@ namespace RLNET
             GL.ColorPointer(3, ColorPointerType.Float, 3 * sizeof(float), 0);
             GL.BufferData(BufferTarget.ArrayBuffer, (IntPtr)(colorVertices.Length * 3 * sizeof(float)), colorVertices, BufferUsageHint.DynamicDraw);
             //Draw
-            GL.DrawElements(PrimitiveType.Triangles, Width * Height * 6, DrawElementsType.UnsignedShort, 0);
+            GL.DrawElements(PrimitiveType.Triangles, Width * Height * 6, DrawElementsType.UnsignedInt, 0);
 
             //Clean Up
             GL.Disable(EnableCap.Texture2D);
@@ -325,19 +450,19 @@ namespace RLNET
             window.SwapBuffers();
         }
 
-        private ushort[] CreateIndices(int cellCount)
+        private uint[] CreateIndices(int cellCount)
         {
-            ushort[] indices = new ushort[cellCount * 6];
+            uint[] indices = new uint[cellCount * 6];
 
-            for (int i = 0; i < cellCount; i++)
+            for (uint i = 0; i < cellCount; i++)
             {
-                ushort iv = (ushort)(i * 4);
-                ushort ii = (ushort)(i * 6);
+                uint iv = (uint)(i * 4);
+                uint ii = (uint)(i * 6);
                 indices[ii] = iv;
-                indices[ii + 1] = (ushort)(iv + 1);
-                indices[ii + 2] = (ushort)(iv + 2);
-                indices[ii + 3] = (ushort)(iv + 2);
-                indices[ii + 4] = (ushort)(iv + 3);
+                indices[ii + 1] = (uint)(iv + 1);
+                indices[ii + 2] = (uint)(iv + 2);
+                indices[ii + 3] = (uint)(iv + 2);
+                indices[ii + 4] = (uint)(iv + 3);
                 indices[ii + 5] = iv;
             }
 

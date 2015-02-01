@@ -45,6 +45,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="ResizeEvent.cs" />
     <Compile Include="RLCell.cs" />
     <Compile Include="RLConsole.cs" />
     <Compile Include="RLColor.cs" />
@@ -52,7 +53,11 @@
     <Compile Include="RLKeyPress.cs" />
     <Compile Include="RLKeyboard.cs" />
     <Compile Include="RLMouse.cs" />
+    <Compile Include="RLResizeType.cs" />
     <Compile Include="RLRootConsole.cs" />
+    <Compile Include="RLSettings.cs" />
+    <Compile Include="RLWindowState.cs" />
+    <Compile Include="RLWindowType.cs" />
     <Compile Include="UpdateEvent.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
