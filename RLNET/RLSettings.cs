@@ -40,6 +40,7 @@ namespace RLNET
         public int CharHeight { get; set; }
         public float Scale { get; set; }
         public string Title { get; set; }
+        public RLWindowState StartWindowState { get; set; }
         public RLWindowBorder WindowBorder { get; set; }
         public RLResizeType ResizeType { get; set; }
 
@@ -54,6 +55,7 @@ namespace RLNET
             Title = "RLNET Console";
             WindowBorder = RLWindowBorder.Fixed;
             ResizeType = RLResizeType.None;
+            StartWindowState = RLWindowState.Normal;
         }
     }
 }

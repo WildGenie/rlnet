@@ -62,25 +62,19 @@ namespace RLNET
         private int offsetX;
         private int offsetY;
 
-        internal RLMouse(GameWindow window, int charWidth, int charHeight, float scale)
+        internal RLMouse(GameWindow window)
         {
-            this.charWidth = charWidth;
-            this.charHeight = charHeight;
-            this.scale = scale;
-
             window.MouseMove += window_MouseMove;
             window.MouseDown += window_MouseDown;
             window.MouseUp += window_MouseUp;
         }
 
-        internal void UpdateOffset(int offsetX, int offsetY)
+        internal void Calibrate(int charWidth, int charHeight, int offsetX, int offsetY, float scale)
         {
+            this.charWidth = charWidth;
+            this.charHeight = charHeight;
             this.offsetX = offsetX;
             this.offsetY = offsetY;
-        }
-
-        internal void UpdateScale(float scale)
-        {
             this.scale = scale;
         }
 

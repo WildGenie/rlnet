@@ -52,7 +52,8 @@ namespace RLNET
         private float vRatio;
         private int charsPerRow;
 
-        private Vector3 scale;
+        private float scale;
+        private Vector3 scale3;
         private int charWidth;
         private int charHeight;
         private RLResizeType resizeType;
@@ -119,17 +120,26 @@ namespace RLNET
                 throw new ArgumentException("CharWidth cannot be zero or less");
             if (settings.CharHeight <= 0)
                 throw new ArgumentException("CharHeight cannot be zero or less");
-
+            if (settings.Scale <= 0)
+                throw new ArgumentException("Scale cannot be zero or less");
             if (System.IO.File.Exists(settings.BitmapFile) == false)
                 throw new System.IO.FileNotFoundException("cannot find bitmapFile");
 
-            this.scale = new Vector3(settings.Scale, settings.Scale, 1f);
+
+
+            this.scale = settings.Scale;
+            this.scale3 = new Vector3(scale, scale, 1f);
             this.charWidth = settings.CharWidth;
             this.charHeight = settings.CharHeight;
             this.resizeType = settings.ResizeType;
 
-            window = new GameWindow((int)(settings.Width * charWidth * scale.X), (int)(settings.Height * charHeight * scale.Y), GraphicsMode.Default);
+            window = new GameWindow((int)(settings.Width * charWidth * scale), (int)(settings.Height * charHeight * scale), GraphicsMode.Default);
             window.WindowBorder = (WindowBorder)settings.WindowBorder;
+            if (settings.StartWindowState == RLWindowState.Fullscreen || settings.StartWindowState == RLWindowState.Maximized)
+            {
+                window.WindowState = (WindowState)settings.StartWindowState;
+            }
+
             window.Title = settings.Title;
             window.RenderFrame += window_RenderFrame;
             window.UpdateFrame += window_UpdateFrame;
@@ -137,17 +147,16 @@ namespace RLNET
             window.Resize += window_Resize;
             window.Closed += window_Closed;
             window.Closing += window_Closing;
+            Mouse = new RLMouse(window);
             Keyboard = new RLKeyboard(window);
-            Mouse = new RLMouse(window, charWidth, charHeight, settings.Scale);
+            LoadTexture2d(settings.BitmapFile);
 
-            texId = LoadTexture2d(settings.BitmapFile);
             vboId = GL.GenBuffer();
             iboId = GL.GenBuffer();
             tcboId = GL.GenBuffer();
             foreColorId = GL.GenBuffer();
             backColorId = GL.GenBuffer();
-
-            CreateBuffers(settings.Width, settings.Height);
+            CalcWindow(true);
         }
 
         void window_Load(object sender, EventArgs e)
@@ -177,6 +186,42 @@ namespace RLNET
             window.WindowState = (WindowState)windowState;
         }
 
+        public void LoadBitmap(string bitmapFile, int charWidth, int charHeight)
+        {
+            if (bitmapFile == null)
+                throw new ArgumentNullException("bitmapFile");
+            if (charWidth <= 0)
+                throw new ArgumentException("charWidth cannot be zero or less");
+            if (charHeight <= 0)
+                throw new ArgumentException("charHeight cannot be zero or less");
+
+            if (this.charWidth != charWidth || this.charHeight != charHeight)
+            {
+                this.charWidth = charWidth;
+                this.charHeight = charHeight;
+
+                if (resizeType == RLResizeType.ResizeCells || window.WindowState == WindowState.Fullscreen || window.WindowState == WindowState.Maximized)
+                {
+                    CalcWindow(false);
+                }
+                else
+                {
+                    int viewWidth = (int)(Width * charWidth * scale);
+                    int viewHeight = (int)(Height * charHeight * scale);
+
+                    if (viewWidth != window.Width || viewHeight != window.Height)
+                    {
+                        ResizeWindow(viewWidth, viewHeight);
+                    }
+                    else
+                    {
+                        CalcWindow(false);
+                    }
+                }
+            }
+            LoadTexture2d(bitmapFile);
+        }
+
         public void Close()
         {
             window.Close();
@@ -184,19 +229,29 @@ namespace RLNET
 
         void window_Resize(object sender, EventArgs e)
         {
+            CalcWindow(false);
+        }
+
+        private void CalcWindow(bool startup)
+        {
             if (resizeType == RLResizeType.None)
             {
-                int viewWidth = (int)(Width * charWidth * scale.X);
-                int viewHeight = (int)(Height * charHeight * scale.Y);
+                int viewWidth = (int)(Width * charWidth * scale);
+                int viewHeight = (int)(Height * charHeight * scale);
                 int newOffsetX = (window.Width - viewWidth) / 2;
                 int newOffsetY = (window.Height - viewHeight) / 2;
 
-                if (offsetX != newOffsetX || offsetY != newOffsetY)
+                if (startup || offsetX != newOffsetX || offsetY != newOffsetY)
                 {
                     offsetX = newOffsetX;
                     offsetY = newOffsetY;
-                    Mouse.UpdateOffset(offsetX, offsetY);
+                    Mouse.Calibrate(charWidth, charHeight, offsetX, offsetY, scale);
                     GL.Viewport(offsetX, offsetY, viewWidth, viewHeight);
+                }
+
+                if (startup)
+                {
+                    CreateBuffers(Width, Height);
                 }
             }
             else if (resizeType == RLResizeType.ResizeCells)
@@ -204,35 +259,36 @@ namespace RLNET
                 int width = window.Width / charWidth;
                 int height = window.Height / charHeight;
 
-                if (width != Width || height != Height)
+                if (startup || width != Width || height != Height)
                 {
                     Resize(width, height);
                     CreateBuffers(width, height);
-                    GL.Viewport(0, 0, (int)(Width * charWidth * scale.X), (int)(Height * charHeight * scale.Y));
+                    GL.Viewport(0, 0, (int)(Width * charWidth * scale), (int)(Height * charHeight * scale));
+                    Mouse.Calibrate(charWidth, charHeight, offsetX, offsetY, scale);
                     if (OnResize != null) OnResize(this, new ResizeEventArgs(width, height));
                 }
             }
             else if (resizeType == RLResizeType.ResizeScale)
             {
                 float newScale = Math.Min(window.Width / (charWidth * Width), window.Height / (charHeight * Height));
-
-                if (newScale != scale.X)
-                {
-                    scale = new Vector3(newScale, newScale, 1);
-                    Mouse.UpdateScale(newScale);
-                }
-
-                int viewWidth = (int)(Width * charWidth * scale.X);
-                int viewHeight = (int)(Height * charHeight * scale.Y);
+                int viewWidth = (int)(Width * charWidth * newScale);
+                int viewHeight = (int)(Height * charHeight * newScale);
                 int newOffsetX = (window.Width - viewWidth) / 2;
                 int newOffsetY = (window.Height - viewHeight) / 2;
 
-                if (offsetX != newOffsetX || offsetY != newOffsetY)
+                if (startup || newScale != scale || offsetX != newOffsetX || offsetY != newOffsetY)
                 {
                     offsetX = newOffsetX;
                     offsetY = newOffsetY;
-                    Mouse.UpdateOffset(offsetX, offsetY);
+                    scale = newScale;
+                    scale3 = new Vector3(scale, scale, 1);
+                    Mouse.Calibrate(charWidth, charHeight, offsetX, offsetY, scale);
                     GL.Viewport(offsetX, offsetY, viewWidth, viewHeight);
+                }
+
+                if (startup)
+                {
+                    CreateBuffers(Width, Height);
                 }
             }
         }
@@ -391,7 +447,7 @@ namespace RLNET
             //Set Projection
             GL.MatrixMode(MatrixMode.Projection);
             GL.LoadIdentity();
-            GL.Ortho(0, Width * charWidth * scale.X, Height * charHeight * scale.Y, 0, -1, 1);
+            GL.Ortho(0, Width * charWidth * scale, Height * charHeight * scale, 0, -1, 1);
             GL.MatrixMode(MatrixMode.Modelview);
             GL.LoadIdentity();
 
@@ -407,7 +463,7 @@ namespace RLNET
             GL.EnableClientState(ArrayCap.VertexArray);
             GL.EnableClientState(ArrayCap.IndexArray);
             GL.EnableClientState(ArrayCap.ColorArray);
-            GL.Scale(scale);
+            GL.Scale(scale3);
 
             //VBO
             //Vertex Buffer
@@ -500,10 +556,11 @@ namespace RLNET
             return vertices;
         }
 
-        private int LoadTexture2d(string filename)
+        private void LoadTexture2d(string filename)
         {
-            int id = GL.GenTexture();
-            GL.BindTexture(TextureTarget.Texture2D, id);
+            if (texId != 0) GL.DeleteTexture(texId);
+            texId = GL.GenTexture();
+            GL.BindTexture(TextureTarget.Texture2D, texId);
 
             Bitmap bmp = new Bitmap(filename);
             BitmapData bmpData = bmp.LockBits(
@@ -537,8 +594,6 @@ namespace RLNET
 
             GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMinFilter, (int)TextureMinFilter.Nearest);
             GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMagFilter, (int)TextureMagFilter.Nearest);
-
-            return id;
         }
     }
 }

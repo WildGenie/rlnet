@@ -49,6 +49,7 @@ namespace RLNET.Sample
             settings.Title = "RLNET Sample";
             settings.WindowBorder = RLWindowBorder.Resizable;
             settings.ResizeType = RLResizeType.ResizeCells;
+            settings.StartWindowState = RLWindowState.Normal;
 
             rootConsole = new RLRootConsole(settings);
             rootConsole.Update += rootConsole_Update;
