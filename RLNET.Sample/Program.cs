@@ -39,10 +39,29 @@ namespace RLNET.Sample
 
         public static void Main()
         {
-            rootConsole = new RLRootConsole("ascii_8x8.png", 50, 50, 8, 8, 1f, "RLNET Sample");
+            RLSettings settings = new RLSettings();
+            settings.BitmapFile = "ascii_8x8.png";
+            settings.CharWidth = 8;
+            settings.CharHeight = 8;
+            settings.Width = 60;
+            settings.Height = 40;
+            settings.Scale = 1f;
+            settings.Title = "RLNET Sample";
+            settings.WindowBorder = RLWindowBorder.Resizable;
+            settings.ResizeType = RLResizeType.ResizeCells;
+            settings.StartWindowState = RLWindowState.Normal;
+
+            rootConsole = new RLRootConsole(settings);
             rootConsole.Update += rootConsole_Update;
             rootConsole.Render += rootConsole_Render;
+            rootConsole.OnLoad += rootConsole_OnLoad;
             rootConsole.Run();
+
+        }
+
+        static void rootConsole_OnLoad(object sender, EventArgs e)
+        {
+            //rootConsole.SetWindowState(RLWindowState.Fullscreen);
         }
 
         static void rootConsole_Update(object sender, UpdateEventArgs e)
@@ -58,6 +77,8 @@ namespace RLNET.Sample
                     playerX--;
                 else if (keyPress.Key == RLKey.Right)
                     playerX++;
+                if (keyPress.Key == RLKey.Escape)
+                    rootConsole.Close();
             }
         }
 
@@ -67,7 +88,7 @@ namespace RLNET.Sample
 
             rootConsole.Print(1, 1, "Hello World!", RLColor.White);
 
-            rootConsole.Set(playerX, playerY, RLColor.White, null, '@');
+            rootConsole.SetChar(playerX, playerY, '@');
 
             int color = 1;
             if (rootConsole.Mouse.LeftPressed)

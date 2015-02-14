@@ -37,11 +37,21 @@ namespace RLNET
 {
     public class RLConsole
     {
-        public int Width { get; private set; }
-        public int Height { get; private set; }
+        public int Width { get; protected set; }
+        public int Height { get; protected set; }
         internal RLCell[,] cells;
 
         public RLConsole(int width, int height)
+        {
+            Resize(width, height);
+        }
+
+        /// <summary>
+        /// Resizes the console.
+        /// </summary>
+        /// <param name="width">The new width of the console, in cells.</param>
+        /// <param name="height">The new height of the console, in cells.</param>
+        public void Resize(int width, int height)
         {
             if (width <= 0)
                 throw new ArgumentOutOfRangeException("Width must be greater than zero.");
@@ -62,7 +72,7 @@ namespace RLNET
                 for (int ix = 0; ix < Width; ix++)
                 {
                     cells[ix, iy].backColor = RLColor.Black;
-                    cells[ix, iy].color = RLColor.Black;
+                    cells[ix, iy].color = RLColor.White;
                     cells[ix, iy].character = 0;
                 }
         }

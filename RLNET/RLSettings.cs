@@ -23,7 +23,6 @@
  */
 #endregion
 
-using OpenTK;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -32,37 +31,31 @@ using System.Threading.Tasks;
 
 namespace RLNET
 {
-    public class RLKeyboard
+    public class RLSettings
     {
-        private RLKeyPress keyPress;
-        private bool numLock;
-        private bool capsLock;
-        private bool scrollLock;
+        public string BitmapFile { get; set; }
+        public int Width { get; set; }
+        public int Height { get; set; }
+        public int CharWidth { get; set; }
+        public int CharHeight { get; set; }
+        public float Scale { get; set; }
+        public string Title { get; set; }
+        public RLWindowState StartWindowState { get; set; }
+        public RLWindowBorder WindowBorder { get; set; }
+        public RLResizeType ResizeType { get; set; }
 
-        internal RLKeyboard(GameWindow gameWindow)
+        public RLSettings()
         {
-            gameWindow.KeyDown += gameWindow_KeyDown;
+            BitmapFile = "ascii_8x8.png";
+            Width = 60;
+            Height = 40;
+            CharWidth = 8;
+            CharHeight = 8;
+            Scale = 1f;
+            Title = "RLNET Console";
+            WindowBorder = RLWindowBorder.Fixed;
+            ResizeType = RLResizeType.None;
+            StartWindowState = RLWindowState.Normal;
         }
-
-        private void gameWindow_KeyDown(object sender, OpenTK.Input.KeyboardKeyEventArgs e)
-        {
-            if (e.Key == OpenTK.Input.Key.NumLock) numLock = !numLock;
-            else if (e.Key == OpenTK.Input.Key.CapsLock) capsLock = !capsLock;
-            else if (e.Key == OpenTK.Input.Key.ScrollLock) scrollLock = !scrollLock;
-            RLKeyPress newKeyPress = new RLKeyPress((RLKey)e.Key, e.Alt, e.Shift, e.Control, e.IsRepeat, numLock, capsLock, scrollLock);
-            if (keyPress != newKeyPress) keyPress = newKeyPress;
-        }
-
-        /// <summary>
-        /// Checks to see if a key was pressed.
-        /// </summary>
-        /// <returns>Key Press, null if nothing was pressed.</returns>
-        public RLKeyPress GetKeyPress()
-        {
-            RLKeyPress kp = keyPress;
-            keyPress = null;
-            return kp;
-        }
-
     }
 }

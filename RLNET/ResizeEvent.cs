@@ -23,7 +23,6 @@
  */
 #endregion
 
-using OpenTK;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -32,37 +31,25 @@ using System.Threading.Tasks;
 
 namespace RLNET
 {
-    public class RLKeyboard
+    public delegate void ResizeEventHandler(object sender, ResizeEventArgs e);
+
+    public class ResizeEventArgs : EventArgs
     {
-        private RLKeyPress keyPress;
-        private bool numLock;
-        private bool capsLock;
-        private bool scrollLock;
-
-        internal RLKeyboard(GameWindow gameWindow)
+        public ResizeEventArgs(int x, int y)
         {
-            gameWindow.KeyDown += gameWindow_KeyDown;
-        }
-
-        private void gameWindow_KeyDown(object sender, OpenTK.Input.KeyboardKeyEventArgs e)
-        {
-            if (e.Key == OpenTK.Input.Key.NumLock) numLock = !numLock;
-            else if (e.Key == OpenTK.Input.Key.CapsLock) capsLock = !capsLock;
-            else if (e.Key == OpenTK.Input.Key.ScrollLock) scrollLock = !scrollLock;
-            RLKeyPress newKeyPress = new RLKeyPress((RLKey)e.Key, e.Alt, e.Shift, e.Control, e.IsRepeat, numLock, capsLock, scrollLock);
-            if (keyPress != newKeyPress) keyPress = newKeyPress;
+            this.Width = x;
+            this.Height = y;
         }
 
         /// <summary>
-        /// Checks to see if a key was pressed.
+        /// Width, in cells, of the new size.
         /// </summary>
-        /// <returns>Key Press, null if nothing was pressed.</returns>
-        public RLKeyPress GetKeyPress()
-        {
-            RLKeyPress kp = keyPress;
-            keyPress = null;
-            return kp;
-        }
+        public int Width { get; private set; }
+
+        /// <summary>
+        /// Height, in cells, of the new size.
+        /// </summary>
+        public int Height { get; private set; }
 
     }
 }

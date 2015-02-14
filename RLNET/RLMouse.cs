@@ -59,16 +59,23 @@ namespace RLNET
         private int charWidth;
         private int charHeight;
         private float scale;
+        private int offsetX;
+        private int offsetY;
 
-        internal RLMouse(GameWindow window, int charWidth, int charHeight, float scale)
+        internal RLMouse(GameWindow window)
         {
-            this.charWidth = charWidth;
-            this.charHeight = charHeight;
-            this.scale = scale;
-
             window.MouseMove += window_MouseMove;
             window.MouseDown += window_MouseDown;
             window.MouseUp += window_MouseUp;
+        }
+
+        internal void Calibrate(int charWidth, int charHeight, int offsetX, int offsetY, float scale)
+        {
+            this.charWidth = charWidth;
+            this.charHeight = charHeight;
+            this.offsetX = offsetX;
+            this.offsetY = offsetY;
+            this.scale = scale;
         }
 
         private void window_MouseUp(object sender, OpenTK.Input.MouseButtonEventArgs e)
@@ -101,8 +108,10 @@ namespace RLNET
 
         private void window_MouseMove(object sender, OpenTK.Input.MouseMoveEventArgs e)
         {
-            X = (int)(e.X / (charWidth * scale));
-            Y = (int)(e.Y / (charHeight * scale));
+            X = (int)((e.X - offsetX) / (charWidth * scale));
+            Y = (int)((e.Y - offsetY) / (charHeight * scale));
+            rightClick = false;
+            leftClick = false;
         }
 
         /// <summary>
