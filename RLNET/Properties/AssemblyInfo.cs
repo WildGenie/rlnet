@@ -6,10 +6,10 @@ using System.Runtime.InteropServices;
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
 [assembly: AssemblyTitle("RLNET")]
-[assembly: AssemblyDescription("RLNET")]
+[assembly: AssemblyDescription( "RLNET is a lightweight API to help quickly create tile-based games for .NET. RLNET provides a console output, swappable colors, true color sprites, keyboard and mouse inputs." )]
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("Travis M. Clark")]
-[assembly: AssemblyProduct("RLNET.Properties")]
+[assembly: AssemblyProduct("RLNET")]
 [assembly: AssemblyCopyright("2014")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
