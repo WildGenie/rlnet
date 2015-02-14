@@ -1,7 +1,0 @@
-E:\User\Gaming\Downloads\SourceTree\BitBucket\RLNET\RLNET\bin\Release\RLNET.dll
-E:\User\Gaming\Downloads\SourceTree\BitBucket\RLNET\RLNET\bin\Release\RLNET.pdb
-E:\User\Gaming\Downloads\SourceTree\BitBucket\RLNET\RLNET\bin\Release\OpenTK.dll
-E:\User\Gaming\Downloads\SourceTree\BitBucket\RLNET\RLNET\bin\Release\OpenTK.pdb
-E:\User\Gaming\Downloads\SourceTree\BitBucket\RLNET\RLNET\bin\Release\OpenTK.xml
-E:\User\Gaming\Downloads\SourceTree\BitBucket\RLNET\RLNET\obj\Release\RLNET.dll
-E:\User\Gaming\Downloads\SourceTree\BitBucket\RLNET\RLNET\obj\Release\RLNET.pdb
