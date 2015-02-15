@@ -97,9 +97,103 @@ namespace RLNET
             return new OpenTK.Vector3(r, g, b);
         }
 
+        /// <summary>
+        /// Blends the two colors
+        /// </summary>
+        /// <param name="ColorA">Primary Color</param>
+        /// <param name="ColorB">Secondary Color</param>
+        /// <param name="Ratio">Ratio of the colors that are blended (255 - Full Primary, 0 - Full Secondary)</param>
+        /// <returns>New Blended Color</returns>
+        public static RLColor Blend(RLColor primary, RLColor secondary, byte ratio)
+        {
+            return Blend(primary, secondary, (float)ratio / 255f);
+        }
+
+        /// <summary>
+        /// Evenly blends two colors
+        /// </summary>
+        /// <param name="color1"></param>
+        /// <param name="color2"></param>
+        /// <returns>New Blended Color</returns>
+        public static RLColor Blend(RLColor color1, RLColor color2)
+        {
+            return Blend(color1, color2, .5f);
+        }
+
+        /// <summary>
+        /// Blends the two colors
+        /// </summary>
+        /// <param name="ColorA">Primary Color</param>
+        /// <param name="ColorB">Secondary Color</param>
+        /// <param name="Ratio">Ratio of the colors that are blended (1f - Full Primary, 0f - Full Secondary)</param>
+        /// <returns>New Blended Color</returns>
+        public static RLColor Blend(RLColor primary, RLColor secondary, float ratio)
+        {
+            return secondary - ((secondary - primary) * ratio);
+        }
+
+        public static RLColor operator +(RLColor color, float f)
+        {
+            return new RLColor(color.r + f, color.g + f, color.b + f);
+        }
+
+        public static RLColor operator -(RLColor color, float f)
+        {
+            return new RLColor(color.r - f, color.g - f, color.b - f);
+        }
+
         public static RLColor operator *(RLColor color, float f)
         {
-            return new RLColor(color.r * f, color.g * f, color.r * f);
+            return new RLColor(color.r * f, color.g * f, color.b * f);
+        }
+
+        public static RLColor operator /(RLColor color, float f)
+        {
+            return new RLColor(color.r / f, color.g / f, color.b / f);
+        }
+
+        public static RLColor operator +(RLColor color, byte b)
+        {
+            float f = (byte)b / 255f;
+            return new RLColor(color.r + f, color.g + f, color.b + f);
+        }
+
+        public static RLColor operator -(RLColor color, byte b)
+        {
+            float f = (byte)b / 255f;
+            return new RLColor(color.r - f, color.g - f, color.b - f);
+        }
+
+        public static RLColor operator *(RLColor color, byte b)
+        {
+            float f = (byte)b / 255f;
+            return new RLColor(color.r * f, color.g * f, color.b * f);
+        }
+
+        public static RLColor operator /(RLColor color, byte b)
+        {
+            float f = (byte)b / 255f;
+            return new RLColor(color.r / f, color.g / f, color.b / f);
+        }
+
+        public static RLColor operator +(RLColor colorA, RLColor colorB)
+        {
+            return new RLColor(colorA.r + colorB.r, colorA.g + colorB.g, colorA.b + colorB.b);
+        }
+
+        public static RLColor operator -(RLColor colorA, RLColor colorB)
+        {
+            return new RLColor(colorA.r - colorB.r, colorA.g - colorB.g, colorA.b - colorB.b);
+        }
+
+        public static RLColor operator *(RLColor colorA, RLColor colorB)
+        {
+            return new RLColor(colorA.r * colorB.r, colorA.g * colorB.g, colorA.b * colorB.b);
+        }
+
+        public static RLColor operator /(RLColor colorA, RLColor colorB)
+        {
+            return new RLColor(colorA.r / colorB.r, colorA.g / colorB.g, colorA.b / colorB.b);
         }
 
         public override string ToString()
