@@ -297,12 +297,16 @@ namespace RLNET
         {
             if (window != null)
                 window.Dispose();
-            GL.DeleteBuffer(vboId);
-            GL.DeleteBuffer(iboId);
-            GL.DeleteBuffer(tcboId);
-            GL.DeleteBuffer(foreColorId);
-            GL.DeleteBuffer(backColorId);
-            GL.DeleteTexture(texId);
+
+            if (!closed)
+            {
+                GL.DeleteBuffer(vboId);
+                GL.DeleteBuffer(iboId);
+                GL.DeleteBuffer(tcboId);
+                GL.DeleteBuffer(foreColorId);
+                GL.DeleteBuffer(backColorId);
+                GL.DeleteTexture(texId);
+            }
         }
 
         private void CreateBuffers(int width, int height)
@@ -393,6 +397,13 @@ namespace RLNET
         private void window_Closed(object sender, EventArgs e)
         {
             closed = true;
+
+            GL.DeleteBuffer(vboId);
+            GL.DeleteBuffer(iboId);
+            GL.DeleteBuffer(tcboId);
+            GL.DeleteBuffer(foreColorId);
+            GL.DeleteBuffer(backColorId);
+            GL.DeleteTexture(texId);
         }
 
         /// <summary>

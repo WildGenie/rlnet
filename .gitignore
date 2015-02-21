@@ -14,3 +14,71 @@ RLNET/obj/Debug/TemporaryGeneratedFile_E7A71F73-0F8D-4B9B-B56E-8E70B10BC5D3.cs
 RLNET/obj/Release/TemporaryGeneratedFile_036C0B5B-1481-4323-8D20-8F5ADCB23D92.cs
 RLNET/obj/Release/TemporaryGeneratedFile_5937a670-0e60-4077-877b-f7221da3dda1.cs
 RLNET/obj/Release/TemporaryGeneratedFile_E7A71F73-0F8D-4B9B-B56E-8E70B10BC5D3.cs
+
+#OS junk files
+[Tt]humbs.db
+*.DS_Store
+
+#Visual Studio files
+*.[Oo]bj
+*.user
+*.aps
+*.pch
+*.vspscc
+*.vssscc
+*_i.c
+*_p.c
+*.ncb
+*.suo
+*.tlb
+*.tlh
+*.bak
+*.[Cc]ache
+*.ilk
+*.log
+*.lib
+*.sbr
+*.sdf
+*.opensdf
+*.unsuccessfulbuild
+ipch/
+obj/
+[Bb]in
+[Dd]ebug*/
+[Rr]elease*/
+Ankh.NoLoad
+
+#MonoDevelop
+*.pidb
+*.userprefs
+
+#Tooling
+_ReSharper*/
+*.resharper
+[Tt]est[Rr]esult*
+*.sass-cache
+
+#Project files
+[Bb]uild/
+
+#Subversion files
+.svn
+
+# Office Temp Files
+~$*
+
+#NuGet
+packages/
+
+#ncrunch
+*ncrunch*
+*crunch*.local.xml
+
+# visual studio database projects
+*.dbmdl
+
+#Test files
+*.testsettings
+
+#Beyond Compare Ignores
+*.orig
