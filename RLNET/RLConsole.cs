@@ -197,13 +197,13 @@ namespace RLNET
         /// <param name="y">Y position to set.</param>
         /// <param name="color">Color to set.</param>
         /// <param name="backColor">Background color to set.</param>
-        /// <param name="Character">Character to set.</param>
+        /// <param name="character">Character to set.</param>
         public void Set(int x, int y, RLColor? color, RLColor? backColor, int? character)
         {
             if (x >= 0 && y >= 0 && x < Width && y < Height)
             {
                 if (color.HasValue) cells[x, y].color = color.Value;
-                if (backColor.HasValue) cells[x, y].backColor = color.Value;
+                if (backColor.HasValue) cells[x, y].backColor = backColor.Value;
                 if (character.HasValue) cells[x, y].character = character.Value;
             }
         }
