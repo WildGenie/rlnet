@@ -9,6 +9,7 @@ RLNET uses [OpenTK](http://www.opentk.com)
 # Getting Started #
 
 Download the latest version and add a reference to RLNET.dll. Be sure to also reference OpenTK.dll in your project.
+Or get the lastest version on NuGet.
 
 # Using RLNET #
 
