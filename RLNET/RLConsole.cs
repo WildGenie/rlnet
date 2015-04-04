@@ -40,6 +40,7 @@ namespace RLNET
         public int Width { get; protected set; }
         public int Height { get; protected set; }
         internal RLCell[,] cells;
+        internal int[,] zBuffer;
 
         public RLConsole(int width, int height)
         {
@@ -61,6 +62,7 @@ namespace RLNET
             Width = width;
             Height = height;
             this.cells = new RLCell[width, height];
+            this.zBuffer = new int[width, height];
         }
 
         /// <summary>
@@ -74,6 +76,7 @@ namespace RLNET
                     cells[ix, iy].backColor = RLColor.Black;
                     cells[ix, iy].color = RLColor.White;
                     cells[ix, iy].character = 0;
+                    zBuffer[ix, iy] = int.MinValue;
                 }
         }
 
@@ -85,12 +88,25 @@ namespace RLNET
         /// <param name="color">Color to set.</param>
         public void Clear(int character, RLColor backColor, RLColor color)
         {
+            Clear(character, backColor, color, int.MinValue);
+        }
+
+        /// <summary>
+        /// Clears the console.
+        /// </summary>
+        /// <param name="character">Character to set.</param>
+        /// <param name="backColor">Background color to set.</param>
+        /// <param name="color">Color to set.</param>
+        /// <param name="z">Z value to set.</param>
+        public void Clear(int character, RLColor backColor, RLColor color, int z)
+        {
             for (int iy = 0; iy < Height; iy++)
                 for (int ix = 0; ix < Width; ix++)
                 {
                     cells[ix, iy].backColor = backColor;
                     cells[ix, iy].color = color;
                     cells[ix, iy].character = character;
+                    zBuffer[ix, iy] = z;
                 }
         }
 
@@ -103,7 +119,25 @@ namespace RLNET
         public void SetChar(int x, int y, int character)
         {
             if (x >= 0 && y >= 0 && x < Width && y < Height)
+            {
                 cells[x, y].character = character;
+            }
+        }
+
+        /// <summary>
+        /// Sets the character at the specified location.
+        /// </summary>
+        /// <param name="x">X position to set.</param>
+        /// <param name="y">Y position to set.</param>
+        /// <param name="character">Character to set.</param>
+        /// <param name="z">Z buffer value.</param>
+        public void SetChar(int x, int y, int character, int z)
+        {
+            if (x >= 0 && y >= 0 && x < Width && y < Height && zBuffer[x, y] <= z)
+            {
+                zBuffer[x, y] = z;
+                cells[x, y].character = character;
+            }
         }
 
         /// <summary>
@@ -127,6 +161,27 @@ namespace RLNET
         }
 
         /// <summary>
+        /// Sets the character in the specified rectangle.
+        /// </summary>
+        /// <param name="x">X position to set.</param>
+        /// <param name="y">Y position to set.</param>
+        /// <param name="width">Width of the rectangle.</param>
+        /// <param name="height">Height of the rectangle.</param>
+        /// <param name="character">Character to set.</param>
+        /// <param name="z">Z buffer value.</param>
+        public void SetChar(int x, int y, int width, int height, int character, int z)
+        {
+            if (width > 0 && height > 0)
+            {
+                for (int iy = y; iy < height + y; iy++)
+                    for (int ix = x; ix < width + x; ix++)
+                    {
+                        SetChar(ix, iy, character, z);
+                    }
+            }
+        }
+
+        /// <summary>
         /// Sets the background color at the specified location.
         /// </summary>
         /// <param name="x">X position to set.</param>
@@ -135,7 +190,25 @@ namespace RLNET
         public void SetBackColor(int x, int y, RLColor color)
         {
             if (x >= 0 && y >= 0 && x < Width && y < Height)
+            {
                 cells[x, y].backColor = color;
+            }
+        }
+
+        /// <summary>
+        /// Sets the background color at the specified location.
+        /// </summary>
+        /// <param name="x">X position to set.</param>
+        /// <param name="y">Y position to set.</param>
+        /// <param name="color">Color to set.</param>
+        /// <param name="z">Z buffer value.</param>
+        public void SetBackColor(int x, int y, RLColor color, int z)
+        {
+            if (x >= 0 && y >= 0 && x < Width && y < Height && zBuffer[x, y] <= z)
+            {
+                cells[x, y].backColor = color;
+                zBuffer[x, y] = z;
+            }
         }
 
         /// <summary>
@@ -159,6 +232,27 @@ namespace RLNET
         }
 
         /// <summary>
+        /// Sets the background color in the specified rectangle.
+        /// </summary>
+        /// <param name="x">X position to set.</param>
+        /// <param name="y">Y position to set.</param>
+        /// <param name="width">Width of the rectangle.</param>
+        /// <param name="height">Height of the rectangle.</param>
+        /// <param name="color">Color to set.</param>
+        /// <param name="z">Z buffer value.</param>
+        public void SetBackColor(int x, int y, int width, int height, RLColor color, int z)
+        {
+            if (width > 0 && height > 0)
+            {
+                for (int iy = y; iy < height + y; iy++)
+                    for (int ix = x; ix < width + x; ix++)
+                    {
+                        SetBackColor(ix, iy, color, z);
+                    }
+            }
+        }
+
+        /// <summary>
         /// Sets the color at the specified location.
         /// </summary>
         /// <param name="x">X position to set.</param>
@@ -168,6 +262,21 @@ namespace RLNET
         {
             if (x >= 0 && y >= 0 && x < Width && y < Height)
                 cells[x, y].color = color;
+        }
+
+        /// <summary>
+        /// Sets the color at the specified location.
+        /// </summary>
+        /// <param name="x">X position to set.</param>
+        /// <param name="y">Y position to set.</param>
+        /// <param name="color">Color to set.</param>
+        public void SetColor(int x, int y, RLColor color, int z)
+        {
+            if (x >= 0 && y >= 0 && x < Width && y < Height && zBuffer[x, y] <= z)
+            {
+                zBuffer[x, y] = z;
+                cells[x, y].color = color;
+            }
         }
 
         /// <summary>
@@ -191,6 +300,27 @@ namespace RLNET
         }
 
         /// <summary>
+        /// Sets the color in the specified rectangle.
+        /// </summary>
+        /// <param name="x">X position to set.</param>
+        /// <param name="y">Y position to set.</param>
+        /// <param name="width">Width of the rectangle.</param>
+        /// <param name="height">Height of the rectangle.</param>
+        /// <param name="color">Color to set.</param>
+        /// <param name="z">Z buffer value.</param>
+        public void SetColor(int x, int y, int width, int height, RLColor color, int z)
+        {
+            if (width > 0 && height > 0)
+            {
+                for (int iy = y; iy < height + y; iy++)
+                    for (int ix = x; ix < width + x; ix++)
+                    {
+                        SetColor(ix, iy, color, z);
+                    }
+            }
+        }
+
+        /// <summary>
         /// Sets the color, background color, and character at the specified location.
         /// </summary>
         /// <param name="x">X position to set.</param>
@@ -202,6 +332,26 @@ namespace RLNET
         {
             if (x >= 0 && y >= 0 && x < Width && y < Height)
             {
+                if (color.HasValue) cells[x, y].color = color.Value;
+                if (backColor.HasValue) cells[x, y].backColor = backColor.Value;
+                if (character.HasValue) cells[x, y].character = character.Value;
+            }
+        }
+
+        /// <summary>
+        /// Sets the color, background color, and character at the specified location.
+        /// </summary>
+        /// <param name="x">X position to set.</param>
+        /// <param name="y">Y position to set.</param>
+        /// <param name="color">Color to set.</param>
+        /// <param name="backColor">Background color to set.</param>
+        /// <param name="character">Character to set.</param>
+        /// <param name="z">Z buffer value.</param>
+        public void Set(int x, int y, RLColor? color, RLColor? backColor, int? character, int z)
+        {
+            if (x >= 0 && y >= 0 && x < Width && y < Height && zBuffer[x, y] <= z)
+            {
+                zBuffer[x, y] = z;
                 if (color.HasValue) cells[x, y].color = color.Value;
                 if (backColor.HasValue) cells[x, y].backColor = backColor.Value;
                 if (character.HasValue) cells[x, y].character = character.Value;
@@ -229,7 +379,29 @@ namespace RLNET
         }
 
         /// <summary>
+        /// Sets the color, background color, and character in the specified rectangle.
+        /// </summary>
+        /// <param name="x">X position to set.</param>
+        /// <param name="y">Y position to set.</param>
+        /// <param name="width">Width of the rectangle.</param>
+        /// <param name="height">Height of the rectangle.</param>
+        /// <param name="color">Color to set.</param>
+        /// <param name="z">Z buffer value.</param>
+        public void Set(int x, int y, int width, int height, RLColor? color, RLColor? backColor, int? character, int z)
+        {
+            if (width > 0 && height > 0)
+            {
+                for (int iy = y; iy < height + y; iy++)
+                    for (int ix = x; ix < width + x; ix++)
+                    {
+                        Set(ix, iy, color, backColor, character, z);
+                    }
+            }
+        }
+
+        /// <summary>
         /// Sets color, background color, and character at the specified location.
+        /// Ignores the Z buffer, if you want to check the Z buffer before setting the cell, use SetZCheck
         /// </summary>
         /// <param name="x">X position to set.</param>
         /// <param name="y">Y position to set.</param>
@@ -243,7 +415,24 @@ namespace RLNET
         }
 
         /// <summary>
+        /// Sets color, background color, and character at the specified location.
+        /// </summary>
+        /// <param name="x">X position to set.</param>
+        /// <param name="y">Y position to set.</param>
+        /// <param name="cell">Cell to set.</param>
+        /// <param name="z">Z buffer value.</param>
+        public void Set(int x, int y, RLCell cell, int z)
+        {
+            if (x >= 0 && y >= 0 && x < Width && y < Height && zBuffer[x,y] <= z)
+            {
+                zBuffer[x, y] = z;
+                cells[x, y] = cell;
+            }
+        }
+
+        /// <summary>
         /// Sets the color, background color, and character in the specified rectangle.
+        /// Ignores the Z buffer, if you want to check the Z buffer before setting the cell, use SetZCheck
         /// </summary>
         /// <param name="x">X position to set.</param>
         /// <param name="y">Y position to set.</param>
@@ -263,12 +452,34 @@ namespace RLNET
         }
 
         /// <summary>
+        /// Sets the color, background color, and character in the specified rectangle.
+        /// </summary>
+        /// <param name="x">X position to set.</param>
+        /// <param name="y">Y position to set.</param>
+        /// <param name="width">Width of the rectangle.</param>
+        /// <param name="height">Height of the rectangle.</param>
+        /// <param name="color">Color to set.</param>
+        /// <param name="z">Z buffer value.</param>
+        public void Set(int x, int y, int width, int height, RLCell cell, int z)
+        {
+            if (width > 0 && height > 0)
+            {
+                for (int iy = y; iy < height + y; iy++)
+                    for (int ix = x; ix < width + x; ix++)
+                    {
+                        Set(ix, iy, cell, z);
+                    }
+            }
+        }
+
+        /// <summary>
         /// Prints the text to the console.
         /// </summary>
         /// <param name="x">Starting X position to print.</param>
         /// <param name="y">Starting Y position to print.</param>
         /// <param name="text">Text to be printed.</param>
         /// <param name="color">Color to be printed.</param>
+        /// <param name="backColor">BackColor to be printed.</param>
         public void Print(int x, int y, string text, RLColor color, RLColor? backColor = null)
         {
             if (text == null) return;
@@ -287,6 +498,27 @@ namespace RLNET
         /// <param name="y">Starting Y position to print.</param>
         /// <param name="text">Text to be printed.</param>
         /// <param name="color">Color to be printed.</param>
+        /// <param name="z">Z buffer value.</param>
+        /// <param name="backColor">BackColor to be printed.</param>
+        public void Print(int x, int y, string text, RLColor color, int z, RLColor? backColor = null)
+        {
+            if (text == null) return;
+            for (int i = 0; i < text.Length; i++)
+            {
+                SetColor(x + i, y, color, z);
+                SetChar(x + i, y, text[i], z);
+                if (backColor.HasValue) SetBackColor(x + i, y, backColor.Value, z);
+            }
+        }
+
+        /// <summary>
+        /// Prints the text to the console.
+        /// </summary>
+        /// <param name="x">Starting X position to print.</param>
+        /// <param name="y">Starting Y position to print.</param>
+        /// <param name="text">Text to be printed.</param>
+        /// <param name="color">Color to be printed.</param>
+        /// <param name="backColor">BackColor to be printed.</param>
         /// <param name="wrap">Characters to print before wrapping to the next line.</param>
         /// <returns>Number of lines printed.</returns>
         public int Print(int x, int y, string text, RLColor color, RLColor? backColor, int wrap)
@@ -299,9 +531,26 @@ namespace RLNET
         /// </summary>
         /// <param name="x">Starting X position to print.</param>
         /// <param name="y">Starting Y position to print.</param>
+        /// <param name="text">Text to be printed.</param>
+        /// <param name="color">Color to be printed.</param>
+        /// <param name="backColor">BackColor to be printed.</param>
+        /// <param name="wrap">Characters to print before wrapping to the next line.</param>
+        /// <param name="z">Z buffer value.</param>
+        /// <returns>Number of lines printed.</returns>
+        public int Print(int x, int y, string text, RLColor color, RLColor? backColor, int wrap, int z)
+        {
+            return Print(x, y, -1, text, color, backColor, wrap, z);
+        }
+
+        /// <summary>
+        /// Prints the text to the console.
+        /// </summary>
+        /// <param name="x">Starting X position to print.</param>
+        /// <param name="y">Starting Y position to print.</param>
         /// <param name="maxLines">Maximum number of lines, -1 for no limit.</param>
         /// <param name="text">Text to be printed.</param>
         /// <param name="color">Color to be printed.</param>
+        /// <param name="backColor">BackColor to be printed.</param>
         /// <param name="wrap">Characters to print before wrapping to the next line.</param>
         /// <returns>Number of lines printed.</returns>
         public int Print(int x, int y, int maxLines, string text, RLColor color, RLColor? backColor, int wrap)
@@ -327,6 +576,45 @@ namespace RLNET
                     SetColor(x + j, y + lines, color);
                     SetChar(x + j, y + lines, line[j]);
                     if (backColor.HasValue) SetBackColor(x + i, y, backColor.Value);
+                }
+                lines++;
+            }
+            return lines;
+        }
+
+        /// </summary>
+        /// <param name="x">Starting X position to print.</param>
+        /// <param name="y">Starting Y position to print.</param>
+        /// <param name="maxLines">Maximum number of lines, -1 for no limit.</param>
+        /// <param name="text">Text to be printed.</param>
+        /// <param name="color">Color to be printed.</param>
+        /// <param name="backColor">BackColor to be printed.</param>
+        /// <param name="wrap">Characters to print before wrapping to the next line.</param>
+        /// <param name="z">Z buffer value.</param>
+        /// <returns>Number of lines printed.</returns>
+        public int Print(int x, int y, int maxLines, string text, RLColor color, RLColor? backColor, int wrap, int z)
+        {
+            if (text == null) return 0;
+            StringBuilder sb = new StringBuilder(wrap);
+            string[] words = text.Split(' ');
+            int i = 0;
+            int lines = 0;
+
+            while (i < words.Length && (maxLines == -1 || lines <= maxLines))
+            {
+                while (i < words.Length && sb.Length + words[i].Length + 1 < wrap)
+                {
+                    sb.Append(words[i++] + " ");
+                }
+
+                string line = sb.ToString();
+                sb.Clear();
+
+                for (int j = 0; j < line.Length; j++)
+                {
+                    SetColor(x + j, y + lines, color, z);
+                    SetChar(x + j, y + lines, line[j], z);
+                    if (backColor.HasValue) SetBackColor(x + i, y, backColor.Value, z);
                 }
                 lines++;
             }
